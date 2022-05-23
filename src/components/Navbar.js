@@ -5,41 +5,39 @@ import { getSession, auth } from "../api/auth"
 import { useContext } from "react"
 import { SessionContext } from "../context/SessionContext"
 
-export default function Navbar() {
-  const [user, setUser] = useState({});
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+export default function Navbar() {
+  const [user, setUser] = useState({}); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(()=>{
-    const fetchSession = async () =>{
-      await getSession().then((response) =>{
-        if(response){
-          setIsLoggedIn(true)
-          setUser(response.data.user);
+    const fetchUser =  async () =>{
+      try{
+        let response = await getSession();
+        if(response?.data?.user){
+         setUser(response?.data?.user)
+         setIsLoggedIn(true);
         }
-      })
+      }catch (e){
+        console.log(e);
+      }
+     
     }
-    fetchSession()
-  }, [isLoggedIn, setIsLoggedIn, setUser]
-  )
-  const renderLoginButton = (isLoggedIn) =>{
-    return (isLoggedIn != true) ? 
-    (<button aria-label="Login" onClick={auth}>
-    Login
-    </button>) : ''
-  }
-  const renderProfile = (isLoggedIn) =>{
-    return (isLoggedIn == true) ? 
-    ( <a aria-label="Profile">
-    {user.name}
-  </a>)
-  : ''
+    fetchUser();
+  }, [isLoggedIn])
+
+  const renderProfile = () =>{
+    if(isLoggedIn){
+      return(
+        <p aria-label="Profile">{user.name}</p>
+      )
+    }
   }
   return(
     <div aria-label="Navbar">
       <a href="/" aria-label="App Title">App Title</a>
       <img aria-label="App Logo" src={logo}/>
-      {renderLoginButton(isLoggedIn)}
-      {renderProfile(isLoggedIn)}
+      <button aria-label="Login" onClick={auth}>Login</button>
+      {renderProfile()}
     </div>
   )
 }
